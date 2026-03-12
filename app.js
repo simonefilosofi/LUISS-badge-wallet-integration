@@ -168,6 +168,7 @@ barcodeDataInput.addEventListener('input', () => {
 
 /* ── Extended state ── */
 state.logoDataUrl = null;
+state.logoFile    = null;
 
 /* ── Preview DOM refs ── */
 const passCard          = document.getElementById('passCard');
@@ -346,6 +347,7 @@ logoFileInput.addEventListener('change', () => {
   if (!file || !file.type.startsWith('image/')) return;
   logoFileName.textContent = file.name;
   const reader = new FileReader();
+  state.logoFile = file;
   reader.onload = (e) => { state.logoDataUrl = e.target.result; renderPreview(); };
   reader.readAsDataURL(file);
 });
@@ -365,3 +367,80 @@ p12File.addEventListener('change', () => {
 
 /* ── Initial render ── */
 renderPreview();
+
+
+/* ══════════════════════════════════════════════════════════
+   ICON GENERATION
+   ══════════════════════════════════════════════════════════ */
+
+/**
+ * Draw a rounded-square letter icon at `size`×`size` px.
+ * Uses the current bg/fg colors and first letter of org name.
+ * Returns a Promise<Blob> (image/png).
+ */
+function drawLetterIcon(size) {
+  const cvs = document.createElement('canvas');
+  cvs.width = cvs.height = size;
+  const cx = cvs.getContext('2d');
+
+  // Rounded square background
+  const radius = Math.round(size * 0.22);
+  cx.fillStyle = bgColorInput.value;
+  cx.beginPath();
+  cx.roundRect(0, 0, size, size, radius);
+  cx.fill();
+
+  // Centered first letter
+  const letter = (orgNameInput.value.trim() || 'My Organization').charAt(0).toUpperCase();
+  cx.fillStyle    = fgColorInput.value;
+  cx.font         = `700 ${Math.round(size * 0.54)}px -apple-system, BlinkMacSystemFont, sans-serif`;
+  cx.textAlign    = 'center';
+  cx.textBaseline = 'middle';
+  cx.fillText(letter, size / 2, size / 2);
+
+  return new Promise(resolve => cvs.toBlob(resolve, 'image/png'));
+}
+
+/**
+ * Scale any image Blob to `size`×`size` px via canvas.
+ * Returns a Promise<Blob> (image/png).
+ */
+function scaleImageBlob(blob, size) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const cvs = document.createElement('canvas');
+      cvs.width = cvs.height = size;
+      cvs.getContext('2d').drawImage(img, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      cvs.toBlob(resolve, 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Icon image load failed')); };
+    img.src = url;
+  });
+}
+
+/**
+ * Produce { icon: Blob, icon2x: Blob } for pass bundling.
+ *
+ * No logo  → generate both sizes from canvas (letter on bg color).
+ *            icon.png  = 29×29, icon@2x.png = 58×58
+ *
+ * Logo     → treat the original file as icon@2x.png (high-res source);
+ *            scale down to 29×29 for icon.png.
+ */
+async function generateIconBlobs() {
+  if (state.logoFile) {
+    const raw     = await state.logoFile.arrayBuffer();
+    const icon2x  = new Blob([raw], { type: state.logoFile.type });
+    const icon    = await scaleImageBlob(icon2x, 29);
+    return { icon, icon2x };
+  }
+
+  const [icon, icon2x] = await Promise.all([
+    drawLetterIcon(29),
+    drawLetterIcon(58),
+  ]);
+  return { icon, icon2x };
+}
