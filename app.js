@@ -998,6 +998,10 @@ async function buildAndDownloadSigned() {
   downloadNote.textContent = '';
 
   try {
+    const sFirstName = firstNameInput.value.trim();
+    const sLastName  = lastNameInput.value.trim();
+    const sFullName  = [sFirstName, sLastName].filter(Boolean).join(' ');
+
     const body = {
       barcodeValue:  state.barcodeData,
       barcodeFormat: 'QR',
