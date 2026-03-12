@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wallet Pass Generator</title>
+  <title>LUISS Student Pass</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,24 +12,59 @@
   <header>
     <div class="header-inner">
       <div class="header-brand">
-        <svg class="brand-icon" width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="white" fill-opacity="0.12"/>
-          <rect x="6" y="10" width="20" height="13" rx="2.5" stroke="white" stroke-width="1.6"/>
-          <path d="M6 15h20" stroke="white" stroke-width="1.6"/>
-          <circle cx="10" cy="19" r="1.2" fill="white"/>
-        </svg>
+        <img class="header-logo" src="assets/luiss_logo.png" alt="LUISS logo">
         <div>
-          <h1>Wallet Pass Generator</h1>
-          <p class="tagline">Scan any QR code image and save it to Apple Wallet</p>
+          <h1>LUISS Student Pass</h1>
+          <p class="tagline">Made by a student, for students — not an official LUISS service</p>
         </div>
       </div>
-      <ul class="badges">
-        <li class="badge">No server</li>
-        <li class="badge">No developer account</li>
-        <li class="badge">Nothing leaves your device</li>
-      </ul>
     </div>
   </header>
+
+  <!-- ── INFO STRIP ── -->
+  <div class="info-strip">
+    <div class="info-strip-inner">
+
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-icon">1</div>
+          <div class="how-text">
+            <strong>Upload your QR</strong>
+            <span>Screenshot of your QR code</span>
+          </div>
+        </div>
+
+        <div class="how-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10m0 0-3.5-3.5M13 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="how-step">
+          <div class="how-icon">2</div>
+          <div class="how-text">
+            <strong>Enter your name</strong>
+            <span>It will appear on your pass</span>
+          </div>
+        </div>
+
+        <div class="how-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10m0 0-3.5-3.5M13 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="how-step">
+          <div class="how-icon">3</div>
+          <div class="how-text">
+            <strong>Add to Wallet</strong>
+            <span>One tap — it's in your Apple Wallet</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ── MAIN ── -->
   <main>
@@ -91,24 +126,18 @@
       <section class="card">
         <h2>Customise</h2>
 
-        <input type="hidden" id="orgName" value="LUISS University">
         <input type="hidden" id="firstName">
         <input type="hidden" id="lastName">
 
-        <div class="form-group">
-          <label for="passTitle">Pass title <span class="hint">(large text on card)</span></label>
-          <input type="text" id="passTitle" placeholder="e.g. My Train Ticket" value="LUISS University">
-        </div>
+        <input type="hidden" id="orgName" value="LUISS University">
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="field1Label">Label</label>
-            <input type="text" id="field1Label" placeholder="e.g. Student" value="">
-          </div>
-          <div class="form-group">
-            <label for="field1Value">Name and surname</label>
-            <input type="text" id="field1Value" placeholder="e.g. Mario Rossi" value="">
-          </div>
+        <input type="text" id="passTitle" value="LUISS University" readonly style="display:none">
+        <input type="text" id="field1Label" value="Student" readonly style="display:none">
+
+        <div class="form-group name-field-group">
+          <label for="field1Value">Your full name <span class="required-star">*</span></label>
+          <input class="name-input" type="text" id="field1Value" placeholder="e.g. Mario Rossi" value="" autocomplete="name">
+          <span class="name-hint">This is the only field you need to fill in</span>
         </div>
 
         <input type="hidden" id="field2Label">
@@ -128,7 +157,7 @@
       <input type="hidden" id="labelColorHex" value="#7aa3cc">
 
       <!-- 4. Signing (collapsed) -->
-      <section class="card">
+      <section class="card" style="display:none">
         <button class="collapsible-toggle" id="signingToggle" aria-expanded="false" aria-controls="signingBody">
           <span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -178,44 +207,38 @@
 
       <!-- 5. Download -->
       <div class="download-row">
-        <button class="download-btn" id="downloadBtn" disabled>
+        <button class="cta-btn" id="signedBtn" disabled>
           <span class="btn-idle">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 13V4m0 9-3.5-3.5M10 13l3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect x="2" y="7" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="2"/>
+              <path d="M2 13h18" stroke="currentColor" stroke-width="2"/>
+              <circle cx="6.5" cy="17" r="1.3" fill="currentColor"/>
             </svg>
-            Download .pkpass
+            Add to Apple Wallet
           </span>
           <span class="btn-loading hidden">
-            <svg class="spinner" width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2" stroke-opacity="0.35"/>
-              <path d="M9 2a7 7 0 0 1 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <svg class="spinner" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" stroke-opacity="0.35"/>
+              <path d="M10 2a8 8 0 0 1 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Adding to Wallet…
+          </span>
+        </button>
+        <button class="download-btn" id="downloadBtn" disabled>
+          <span class="btn-idle">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 11V4m0 7-2.5-2.5M8 11l2.5-2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2.5 13h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            Download file (simulator only)
+          </span>
+          <span class="btn-loading hidden">
+            <svg class="spinner" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.8" stroke-opacity="0.35"/>
+              <path d="M8 2a6 6 0 0 1 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
             Building…
           </span>
-        </button>
-        <button class="signed-btn" id="signedBtn" disabled>
-          <span class="btn-idle">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <rect x="3" y="8" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M6 8V6a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            </svg>
-            Download Signed .pkpass
-          </span>
-          <span class="btn-loading hidden">
-            <svg class="spinner" width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2" stroke-opacity="0.35"/>
-              <path d="M9 2a7 7 0 0 1 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            Signing…
-          </span>
-        </button>
-        <button class="web-pass-btn" id="webPassBtn">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <rect x="2" y="3" width="14" height="12" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M6 7h6M6 10.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          Save as Web Pass
         </button>
         <button class="start-over-btn" id="startOverBtn">Start over</button>
         <p class="download-note" id="downloadNote">Upload a QR code image to enable download.</p>
@@ -269,6 +292,26 @@
     </aside>
 
   </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="page-footer">
+    <div class="notice-chips">
+      <div class="notice-chip notice-privacy">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1.5 2 3.5v4c0 2.761 2.239 5 5 5s5-2.239 5-5v-4L7 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M5 7l1.5 1.5L9 5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Your QR code never leaves your device
+      </div>
+      <div class="notice-chip notice-ios">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="3" y="1" width="8" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/>
+          <circle cx="7" cy="11" r="0.8" fill="currentColor"/>
+        </svg>
+        iPhone only &nbsp;·&nbsp; Android not supported (for now)
+      </div>
+    </div>
+  </footer>
 
   <script src="lib/jsQR.min.js"></script>
   <script src="lib/forge.min.js"></script>
