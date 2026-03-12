@@ -144,43 +144,13 @@
         </div>
       </section>
 
-      <!-- 3. Appearance -->
-      <section class="card">
-        <h2>Appearance</h2>
-
-        <div class="theme-presets" role="group" aria-label="Color themes">
-          <button class="preset" data-bg="#1a1a2e" data-fg="#ffffff" data-label="#9090bb" title="Deep Blue"></button>
-          <button class="preset" data-bg="#1b4332" data-fg="#ffffff" data-label="#74c69d" title="Forest"></button>
-          <button class="preset" data-bg="#7f1d1d" data-fg="#ffffff" data-label="#fca5a5" title="Crimson"></button>
-          <button class="preset" data-bg="#78350f" data-fg="#ffffff" data-label="#fcd34d" title="Amber"></button>
-          <button class="preset" data-bg="#3b0764" data-fg="#ffffff" data-label="#c4b5fd" title="Purple"></button>
-          <button class="preset" data-bg="#f1f5f9" data-fg="#1a1a2e" data-label="#64748b" title="Light"></button>
-        </div>
-
-        <div class="color-row">
-          <div class="form-group">
-            <label>Background</label>
-            <div class="color-pair">
-              <input type="color" id="bgColor" value="#021e3a">
-              <input type="text"  id="bgColorHex" value="#021e3a" maxlength="7" class="hex-input">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Text</label>
-            <div class="color-pair">
-              <input type="color" id="fgColor" value="#ffffff">
-              <input type="text"  id="fgColorHex" value="#ffffff" maxlength="7" class="hex-input">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Labels</label>
-            <div class="color-pair">
-              <input type="color" id="labelColor" value="#7aa3cc">
-              <input type="text"  id="labelColorHex" value="#7aa3cc" maxlength="7" class="hex-input">
-            </div>
-          </div>
-        </div>
-      </section>
+      <!-- Colors fixed to LUISS brand — hidden inputs keep JS working -->
+      <input type="hidden" id="bgColor"       value="#021e3a">
+      <input type="hidden" id="bgColorHex"    value="#021e3a">
+      <input type="hidden" id="fgColor"       value="#ffffff">
+      <input type="hidden" id="fgColorHex"    value="#ffffff">
+      <input type="hidden" id="labelColor"    value="#7aa3cc">
+      <input type="hidden" id="labelColorHex" value="#7aa3cc">
 
       <!-- 4. Signing (collapsed) -->
       <section class="card">

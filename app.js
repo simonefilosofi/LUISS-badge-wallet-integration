@@ -219,7 +219,7 @@ const labelColorInput    = document.getElementById('labelColor');
 const labelColorHexInput = document.getElementById('labelColorHex');
 const logoFileInput      = document.getElementById('logoFileInput');
 const logoFileName       = document.getElementById('logoFileName');
-const presetBtns         = document.querySelectorAll('.preset');
+
 const signingToggle      = document.getElementById('signingToggle');
 const signingBody        = document.getElementById('signingBody');
 const p12File            = document.getElementById('p12File');
@@ -324,44 +324,6 @@ function renderPreview() {
   drawQrPlaceholder();
 }
 
-/* ── Color picker ↔ hex input sync ── */
-function isValidHex(v) { return /^#[0-9a-fA-F]{6}$/.test(v); }
-
-function syncFromPicker(picker, hexInput) {
-  hexInput.value = picker.value;
-  renderPreview();
-}
-
-function syncFromHex(hexInput, picker) {
-  let v = hexInput.value.trim();
-  if (v.length > 0 && v[0] !== '#') { v = '#' + v; hexInput.value = v; }
-  if (isValidHex(v)) { picker.value = v; renderPreview(); }
-}
-
-bgColorInput.addEventListener('input',    () => syncFromPicker(bgColorInput,    bgColorHexInput));
-fgColorInput.addEventListener('input',    () => syncFromPicker(fgColorInput,    fgColorHexInput));
-labelColorInput.addEventListener('input', () => syncFromPicker(labelColorInput, labelColorHexInput));
-
-bgColorHexInput.addEventListener('input',    () => syncFromHex(bgColorHexInput,    bgColorInput));
-fgColorHexInput.addEventListener('input',    () => syncFromHex(fgColorHexInput,    fgColorInput));
-labelColorHexInput.addEventListener('input', () => syncFromHex(labelColorHexInput, labelColorInput));
-
-/* ── Preset buttons ── */
-presetBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const bg    = btn.dataset.bg;
-    const fg    = btn.dataset.fg;
-    const label = btn.dataset.label;
-
-    bgColorInput.value       = bg;    bgColorHexInput.value    = bg;
-    fgColorInput.value       = fg;    fgColorHexInput.value    = fg;
-    labelColorInput.value    = label; labelColorHexInput.value = label;
-
-    presetBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderPreview();
-  });
-});
 
 /* ── Text input → re-render ── */
 [orgNameInput, passTitleInput,
@@ -805,9 +767,6 @@ function startOver() {
   bgColorInput.value       = DEFAULTS.bg;    bgColorHexInput.value    = DEFAULTS.bg;
   fgColorInput.value       = DEFAULTS.fg;    fgColorHexInput.value    = DEFAULTS.fg;
   labelColorInput.value    = DEFAULTS.label; labelColorHexInput.value = DEFAULTS.label;
-
-  // No preset matches LUISS defaults — clear all active states
-  presetBtns.forEach(b => b.classList.remove('active'));
 
   // QR data URL
   state.qrDataUrl          = '';
