@@ -1009,7 +1009,6 @@ async function buildAndDownloadSigned() {
       label:         field1LabelInput.value.trim() || '',
       value:         field1ValueInput.value.trim() || '',
       color:         bgColorInput.value,
-      logoURL:       'https://raw.githubusercontent.com/simonefilosofi/wallet-pass-generator/main/assets/luiss_logo.png',
     };
 
     const response = await fetch(WORKER_URL, {
