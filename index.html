@@ -101,6 +101,15 @@
           <input type="text" id="passTitle" placeholder="e.g. My Train Ticket" value="My Pass">
         </div>
 
+        <div class="form-group">
+          <label>Logo <span class="hint">(optional — replaces letter)</span></label>
+          <div class="file-row">
+            <label class="file-btn" for="logoFileInput">Choose image</label>
+            <input type="file" id="logoFileInput" accept="image/*">
+            <span class="file-name" id="logoFileName">No file chosen</span>
+          </div>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="field1Label">Label</label>
@@ -220,6 +229,7 @@
 
           <div class="pass-header">
             <div class="pass-logo-wrap">
+              <img class="pass-logo-img hidden" id="passLogoImg" alt="">
               <div class="pass-logo-letter" id="passLogoLetter">M</div>
             </div>
             <span class="pass-org" id="passOrg">My Organization</span>
@@ -245,24 +255,7 @@
 
           <div class="pass-barcode">
             <div class="barcode-box" id="barcodeBox">
-              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                <!-- QR pattern placeholder -->
-                <rect width="64" height="64" fill="white" rx="4"/>
-                <rect x="6"  y="6"  width="20" height="20" rx="2" fill="#1a1a2e"/>
-                <rect x="38" y="6"  width="20" height="20" rx="2" fill="#1a1a2e"/>
-                <rect x="6"  y="38" width="20" height="20" rx="2" fill="#1a1a2e"/>
-                <rect x="10" y="10" width="12" height="12" fill="white" rx="1"/>
-                <rect x="42" y="10" width="12" height="12" fill="white" rx="1"/>
-                <rect x="10" y="42" width="12" height="12" fill="white" rx="1"/>
-                <rect x="14" y="14" width="4"  height="4"  fill="#1a1a2e"/>
-                <rect x="46" y="14" width="4"  height="4"  fill="#1a1a2e"/>
-                <rect x="14" y="46" width="4"  height="4"  fill="#1a1a2e"/>
-                <rect x="38" y="30" width="6"  height="6"  fill="#1a1a2e"/>
-                <rect x="30" y="38" width="6"  height="6"  fill="#1a1a2e"/>
-                <rect x="30" y="30" width="6"  height="6"  fill="#1a1a2e"/>
-                <rect x="46" y="38" width="6"  height="6"  fill="#1a1a2e"/>
-                <rect x="38" y="46" width="6"  height="6"  fill="#1a1a2e"/>
-              </svg>
+              <canvas id="passQrCanvas" width="64" height="64"></canvas>
             </div>
             <span class="barcode-alt" id="barcodeAltPreview">Scan to open</span>
           </div>

@@ -596,6 +596,13 @@ input[type="file"] { display: none; }
   flex-shrink: 0;
 }
 
+.pass-logo-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
 .pass-logo-letter {
   width: 30px;
   height: 30px;

@@ -37,6 +37,7 @@ function setDecodeSuccess(data) {
   hide(decodeError);
   downloadBtn.disabled = false;
   downloadNote.textContent = '';
+  renderPreview();
 }
 
 function setDecodeError() {
@@ -46,6 +47,7 @@ function setDecodeError() {
   show(decodeError);
   downloadBtn.disabled = true;
   downloadNote.textContent = 'Upload a QR code image to enable download.';
+  renderPreview();
 }
 
 /* ── QR decode ── */
@@ -156,4 +158,210 @@ dropClear.addEventListener('click', (e) => {
 barcodeDataInput.addEventListener('input', () => {
   state.barcodeData = barcodeDataInput.value;
   downloadBtn.disabled = !state.barcodeData.trim();
+  renderPreview();
 });
+
+
+/* ══════════════════════════════════════════════════════════
+   LIVE PREVIEW
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Extended state ── */
+state.logoDataUrl = null;
+
+/* ── Preview DOM refs ── */
+const passCard          = document.getElementById('passCard');
+const passOrg           = document.getElementById('passOrg');
+const passLogoLetter    = document.getElementById('passLogoLetter');
+const passLogoImg       = document.getElementById('passLogoImg');
+const passTitlePreview  = document.getElementById('passTitlePreview');
+const passField2        = document.getElementById('passField2');
+const passField1LabelEl = document.getElementById('passField1Label');
+const passField1ValueEl = document.getElementById('passField1Value');
+const passField2LabelEl = document.getElementById('passField2Label');
+const passField2ValueEl = document.getElementById('passField2Value');
+const barcodeAltPreview = document.getElementById('barcodeAltPreview');
+const passQrCanvas      = document.getElementById('passQrCanvas');
+const passQrCtx         = passQrCanvas.getContext('2d');
+
+/* ── Form input refs ── */
+const orgNameInput       = document.getElementById('orgName');
+const passTitleInput     = document.getElementById('passTitle');
+const field1LabelInput   = document.getElementById('field1Label');
+const field1ValueInput   = document.getElementById('field1Value');
+const field2LabelInput   = document.getElementById('field2Label');
+const field2ValueInput   = document.getElementById('field2Value');
+const bgColorInput       = document.getElementById('bgColor');
+const bgColorHexInput    = document.getElementById('bgColorHex');
+const fgColorInput       = document.getElementById('fgColor');
+const fgColorHexInput    = document.getElementById('fgColorHex');
+const labelColorInput    = document.getElementById('labelColor');
+const labelColorHexInput = document.getElementById('labelColorHex');
+const logoFileInput      = document.getElementById('logoFileInput');
+const logoFileName       = document.getElementById('logoFileName');
+const presetBtns         = document.querySelectorAll('.preset');
+const signingToggle      = document.getElementById('signingToggle');
+const signingBody        = document.getElementById('signingBody');
+const p12File            = document.getElementById('p12File');
+const p12FileNameEl      = document.getElementById('p12FileName');
+const p12PasswordGroup   = document.getElementById('p12PasswordGroup');
+
+/* ── QR placeholder canvas ── */
+function drawQrPlaceholder() {
+  const c = passQrCtx;
+  const S = passQrCanvas.width; // 64
+
+  c.clearRect(0, 0, S, S);
+
+  // White background
+  c.fillStyle = '#ffffff';
+  c.beginPath();
+  c.roundRect(0, 0, S, S, 4);
+  c.fill();
+
+  const dark = '#1a1a2e';
+
+  // Finder pattern: outer square → white inner → dark centre
+  function finder(x, y) {
+    c.fillStyle = dark;
+    c.fillRect(x, y, 20, 20);
+    c.fillStyle = '#ffffff';
+    c.fillRect(x + 3, y + 3, 14, 14);
+    c.fillStyle = dark;
+    c.fillRect(x + 6, y + 6, 8, 8);
+  }
+
+  finder(6, 6);   // top-left
+  finder(38, 6);  // top-right
+  finder(6, 38);  // bottom-left
+
+  // Decorative data modules
+  c.fillStyle = dark;
+  [
+    [30, 6], [30, 12], [36, 12],
+    [30, 30], [36, 30], [42, 30],
+    [30, 36], [42, 36],
+    [30, 42], [36, 42], [42, 42],
+    [48, 30], [48, 36], [48, 42],
+    [38, 48], [44, 48],
+  ].forEach(([dx, dy]) => c.fillRect(dx, dy, 5, 5));
+}
+
+/* ── Render all preview elements ── */
+function renderPreview() {
+  // Colors via CSS custom properties on the card root
+  passCard.style.setProperty('--pass-bg',    bgColorInput.value);
+  passCard.style.setProperty('--pass-fg',    fgColorInput.value);
+  passCard.style.setProperty('--pass-label', labelColorInput.value);
+
+  // Org name + letter avatar
+  const org = orgNameInput.value.trim() || 'My Organization';
+  passOrg.textContent        = org;
+  passLogoLetter.textContent = org.charAt(0).toUpperCase();
+
+  // Logo image vs letter placeholder
+  if (state.logoDataUrl) {
+    passLogoImg.src = state.logoDataUrl;
+    passLogoImg.classList.remove('hidden');
+    passLogoLetter.classList.add('hidden');
+  } else {
+    passLogoImg.classList.add('hidden');
+    passLogoLetter.classList.remove('hidden');
+  }
+
+  // Title
+  passTitlePreview.textContent = passTitleInput.value.trim() || 'My Pass';
+
+  // Secondary field 1 (always visible)
+  passField1LabelEl.textContent = (field1LabelInput.value.trim() || 'Field').toUpperCase();
+  passField1ValueEl.textContent =  field1ValueInput.value.trim() || '—';
+
+  // Secondary field 2 — show only when user has typed something
+  const has2 = field2LabelInput.value.trim() || field2ValueInput.value.trim();
+  if (has2) {
+    passField2.classList.remove('hidden');
+    passField2LabelEl.textContent = field2LabelInput.value.trim().toUpperCase();
+    passField2ValueEl.textContent = field2ValueInput.value.trim() || '—';
+  } else {
+    passField2.classList.add('hidden');
+  }
+
+  // Barcode alt text — show decoded data (truncated) or fallback
+  const alt = state.barcodeData;
+  barcodeAltPreview.textContent = alt
+    ? (alt.length > 28 ? alt.slice(0, 26) + '\u2026' : alt)
+    : 'Scan to open';
+
+  // Redraw QR placeholder canvas
+  drawQrPlaceholder();
+}
+
+/* ── Color picker ↔ hex input sync ── */
+function isValidHex(v) { return /^#[0-9a-fA-F]{6}$/.test(v); }
+
+function syncFromPicker(picker, hexInput) {
+  hexInput.value = picker.value;
+  renderPreview();
+}
+
+function syncFromHex(hexInput, picker) {
+  let v = hexInput.value.trim();
+  if (v.length > 0 && v[0] !== '#') { v = '#' + v; hexInput.value = v; }
+  if (isValidHex(v)) { picker.value = v; renderPreview(); }
+}
+
+bgColorInput.addEventListener('input',    () => syncFromPicker(bgColorInput,    bgColorHexInput));
+fgColorInput.addEventListener('input',    () => syncFromPicker(fgColorInput,    fgColorHexInput));
+labelColorInput.addEventListener('input', () => syncFromPicker(labelColorInput, labelColorHexInput));
+
+bgColorHexInput.addEventListener('input',    () => syncFromHex(bgColorHexInput,    bgColorInput));
+fgColorHexInput.addEventListener('input',    () => syncFromHex(fgColorHexInput,    fgColorInput));
+labelColorHexInput.addEventListener('input', () => syncFromHex(labelColorHexInput, labelColorInput));
+
+/* ── Preset buttons ── */
+presetBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const bg    = btn.dataset.bg;
+    const fg    = btn.dataset.fg;
+    const label = btn.dataset.label;
+
+    bgColorInput.value       = bg;    bgColorHexInput.value    = bg;
+    fgColorInput.value       = fg;    fgColorHexInput.value    = fg;
+    labelColorInput.value    = label; labelColorHexInput.value = label;
+
+    presetBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPreview();
+  });
+});
+
+/* ── Text input → re-render ── */
+[orgNameInput, passTitleInput,
+ field1LabelInput, field1ValueInput,
+ field2LabelInput, field2ValueInput].forEach(el => el.addEventListener('input', renderPreview));
+
+/* ── Logo upload ── */
+logoFileInput.addEventListener('change', () => {
+  const file = logoFileInput.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  logoFileName.textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = (e) => { state.logoDataUrl = e.target.result; renderPreview(); };
+  reader.readAsDataURL(file);
+});
+
+/* ── Signing section collapsible toggle ── */
+signingToggle.addEventListener('click', () => {
+  const expanded = signingToggle.getAttribute('aria-expanded') === 'true';
+  signingToggle.setAttribute('aria-expanded', String(!expanded));
+  signingBody.classList.toggle('hidden');
+});
+
+/* ── p12 file name + password field visibility ── */
+p12File.addEventListener('change', () => {
+  p12FileNameEl.textContent      = p12File.files[0]?.name ?? 'No file chosen';
+  p12PasswordGroup.style.display = p12File.files[0] ? '' : 'none';
+});
+
+/* ── Initial render ── */
+renderPreview();
