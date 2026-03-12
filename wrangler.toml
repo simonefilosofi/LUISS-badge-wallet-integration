@@ -1,0 +1,8 @@
+name            = "luiss-pass-signer"
+main            = "worker.js"
+compatibility_date = "2024-01-01"
+
+# After deploying, your worker URL will be:
+# https://luiss-pass-signer.<your-subdomain>.workers.dev
+#
+# Paste that URL into app.js → WORKER_URL

@@ -217,35 +217,18 @@
         </div>
       </section>
 
-      <!-- 4b. Free online signing -->
-      <section class="card">
-        <button class="collapsible-toggle" id="onlineSignToggle" aria-expanded="false" aria-controls="onlineSignBody">
-          <span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M8 5v3.5L10 10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Sign online — free, no certificate <span class="badge-optional">via WalletWallet</span>
-          </span>
-          <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- 4b. Online signing via proxy -->
+      <section class="card signing-status-card">
+        <div class="signing-status" id="signingStatus">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M5 7.5l2 2 3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-        </button>
-
-        <div class="collapsible-body hidden" id="onlineSignBody">
-          <p class="section-desc">
-            <a class="section-link" href="https://www.walletwallet.dev" target="_blank" rel="noopener">WalletWallet</a>
-            signs your pass with a real certificate — works on a real iPhone.
-            Create a free account, copy your API key, and paste it below.
-          </p>
-          <div class="form-group">
-            <label for="wwApiKey">WalletWallet API key</label>
-            <input type="text" id="wwApiKey" placeholder="ww_live_…" autocomplete="off" spellcheck="false">
-          </div>
-          <p class="section-desc" style="margin-top:8px;margin-bottom:0;font-size:0.75rem;">
-            Note: only the first secondary field and background color are sent. Logo is not included. Your pass data is sent to WalletWallet's servers.
-          </p>
+          <span id="signingStatusText">Signing service ready</span>
         </div>
+        <p class="section-desc" style="margin-top:6px;margin-bottom:0;font-size:0.75rem;">
+          Passes are signed via a private proxy — works on real iPhones, no account needed.
+        </p>
       </section>
 
       <!-- 5. Download -->
@@ -311,11 +294,6 @@
           </div>
 
           <div class="pass-body">
-            <div class="pass-primary">
-              <span class="pass-primary-label">TITLE</span>
-              <span class="pass-primary-value" id="passTitlePreview">LUISS University</span>
-            </div>
-
             <div class="pass-name hidden" id="passNameRow">
               <span class="pass-name-value" id="passNamePreview"></span>
             </div>
