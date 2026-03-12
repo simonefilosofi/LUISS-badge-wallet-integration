@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet Pass Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="header-inner">
+      <div class="header-brand">
+        <svg class="brand-icon" width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="white" fill-opacity="0.12"/>
+          <rect x="6" y="10" width="20" height="13" rx="2.5" stroke="white" stroke-width="1.6"/>
+          <path d="M6 15h20" stroke="white" stroke-width="1.6"/>
+          <circle cx="10" cy="19" r="1.2" fill="white"/>
+        </svg>
+        <div>
+          <h1>Wallet Pass Generator</h1>
+          <p class="tagline">Scan any QR code image and save it to Apple Wallet</p>
+        </div>
+      </div>
+      <ul class="badges">
+        <li class="badge">No server</li>
+        <li class="badge">No developer account</li>
+        <li class="badge">Nothing leaves your device</li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <main>
+
+    <!-- LEFT: editor -->
+    <div class="editor">
+
+      <!-- 1. Hero upload -->
+      <section class="card hero-card">
+        <h2>Upload your QR code</h2>
+        <p class="section-desc">Drop a screenshot, photo, or any image containing a QR code.</p>
+
+        <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload QR code image">
+          <input type="file" id="qrFileInput" accept="image/*" aria-hidden="true">
+
+          <!-- idle state -->
+          <div class="drop-idle" id="dropIdle">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <rect x="4" y="4" width="40" height="40" rx="10" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+              <path d="M24 30V18m0 0-6 6m6-6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="drop-label">Drop image here</span>
+            <span class="drop-sub">or <span class="drop-link">click to browse</span></span>
+          </div>
+
+          <!-- preview state (hidden until image loaded) -->
+          <div class="drop-preview hidden" id="dropPreview">
+            <img id="qrPreviewImg" alt="Uploaded QR code">
+            <button class="drop-clear" id="dropClear" title="Remove image" aria-label="Remove image">✕</button>
+          </div>
+        </div>
+
+        <!-- decode result -->
+        <div class="decode-result hidden" id="decodeResult">
+          <div class="decode-status" id="decodeStatus">
+            <svg class="icon-check" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="decodeStatusText">QR code detected</span>
+          </div>
+          <div class="form-group">
+            <label for="barcodeData">Decoded data <span class="hint">(edit if needed)</span></label>
+            <input type="text" id="barcodeData" placeholder="Decoded QR content" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+
+        <!-- decode error -->
+        <div class="decode-error hidden" id="decodeError">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 5v3.5M8 11v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          No QR code detected — try a clearer or higher-resolution image.
+        </div>
+      </section>
+
+      <!-- 2. Customisation -->
+      <section class="card">
+        <h2>Customise</h2>
+
+        <div class="form-group">
+          <label for="orgName">Organization name</label>
+          <input type="text" id="orgName" placeholder="e.g. Trenitalia" value="My Organization">
+        </div>
+
+        <div class="form-group">
+          <label for="passTitle">Pass title <span class="hint">(large text on card)</span></label>
+          <input type="text" id="passTitle" placeholder="e.g. My Train Ticket" value="My Pass">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field1Label">Label</label>
+            <input type="text" id="field1Label" placeholder="e.g. Seat" value="Member">
+          </div>
+          <div class="form-group">
+            <label for="field1Value">Value</label>
+            <input type="text" id="field1Value" placeholder="e.g. 14A" value="Gold">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field2Label">Label 2 <span class="hint">(optional)</span></label>
+            <input type="text" id="field2Label" placeholder="e.g. Date">
+          </div>
+          <div class="form-group">
+            <label for="field2Value">Value 2</label>
+            <input type="text" id="field2Value" placeholder="e.g. 12 Mar 2026">
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Appearance -->
+      <section class="card">
+        <h2>Appearance</h2>
+
+        <div class="theme-presets" role="group" aria-label="Color themes">
+          <button class="preset" data-bg="#1a1a2e" data-fg="#ffffff" data-label="#9090bb" title="Deep Blue"></button>
+          <button class="preset" data-bg="#1b4332" data-fg="#ffffff" data-label="#74c69d" title="Forest"></button>
+          <button class="preset" data-bg="#7f1d1d" data-fg="#ffffff" data-label="#fca5a5" title="Crimson"></button>
+          <button class="preset" data-bg="#78350f" data-fg="#ffffff" data-label="#fcd34d" title="Amber"></button>
+          <button class="preset" data-bg="#3b0764" data-fg="#ffffff" data-label="#c4b5fd" title="Purple"></button>
+          <button class="preset" data-bg="#f1f5f9" data-fg="#1a1a2e" data-label="#64748b" title="Light"></button>
+        </div>
+
+        <div class="color-row">
+          <div class="form-group">
+            <label>Background</label>
+            <div class="color-pair">
+              <input type="color" id="bgColor" value="#1a1a2e">
+              <input type="text"  id="bgColorHex" value="#1a1a2e" maxlength="7" class="hex-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Text</label>
+            <div class="color-pair">
+              <input type="color" id="fgColor" value="#ffffff">
+              <input type="text"  id="fgColorHex" value="#ffffff" maxlength="7" class="hex-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Labels</label>
+            <div class="color-pair">
+              <input type="color" id="labelColor" value="#9090bb">
+              <input type="text"  id="labelColorHex" value="#9090bb" maxlength="7" class="hex-input">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Signing (collapsed) -->
+      <section class="card">
+        <button class="collapsible-toggle" id="signingToggle" aria-expanded="false" aria-controls="signingBody">
+          <span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            Sign with your own certificate <span class="badge-optional">optional</span>
+          </span>
+          <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div class="collapsible-body hidden" id="signingBody">
+          <p class="section-desc">
+            Upload your <strong>.p12</strong> certificate to produce a pass that opens on a real iOS device.
+            Without this, the pass works in Xcode Simulator only.
+          </p>
+          <div class="form-group">
+            <label for="p12File">.p12 Certificate file</label>
+            <div class="file-row">
+              <label class="file-btn" for="p12File">Choose file</label>
+              <input type="file" id="p12File" accept=".p12,.pfx">
+              <span class="file-name" id="p12FileName">No file chosen</span>
+            </div>
+          </div>
+          <div class="form-group" id="p12PasswordGroup" style="display:none">
+            <label for="p12Password">Certificate password</label>
+            <input type="password" id="p12Password" placeholder="Leave blank if none" autocomplete="off">
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Download -->
+      <div class="download-row">
+        <button class="download-btn" id="downloadBtn" disabled>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 13V4m0 9-3.5-3.5M10 13l3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 16h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Download .pkpass
+        </button>
+        <p class="download-note" id="downloadNote">Upload a QR code image to enable download.</p>
+      </div>
+
+    </div><!-- /editor -->
+
+    <!-- RIGHT: live preview -->
+    <aside class="preview-panel">
+      <div class="preview-sticky">
+        <h2>Preview</h2>
+
+        <div class="pass-card" id="passCard">
+
+          <div class="pass-header">
+            <div class="pass-logo-wrap">
+              <div class="pass-logo-letter" id="passLogoLetter">M</div>
+            </div>
+            <span class="pass-org" id="passOrg">My Organization</span>
+          </div>
+
+          <div class="pass-body">
+            <div class="pass-primary">
+              <span class="pass-primary-label">TITLE</span>
+              <span class="pass-primary-value" id="passTitlePreview">My Pass</span>
+            </div>
+
+            <div class="pass-fields" id="passFieldsPreview">
+              <div class="pass-field" id="passField1">
+                <span class="pass-field-label" id="passField1Label">MEMBER</span>
+                <span class="pass-field-value" id="passField1Value">Gold</span>
+              </div>
+              <div class="pass-field hidden" id="passField2">
+                <span class="pass-field-label" id="passField2Label"></span>
+                <span class="pass-field-value" id="passField2Value"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pass-barcode">
+            <div class="barcode-box" id="barcodeBox">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                <!-- QR pattern placeholder -->
+                <rect width="64" height="64" fill="white" rx="4"/>
+                <rect x="6"  y="6"  width="20" height="20" rx="2" fill="#1a1a2e"/>
+                <rect x="38" y="6"  width="20" height="20" rx="2" fill="#1a1a2e"/>
+                <rect x="6"  y="38" width="20" height="20" rx="2" fill="#1a1a2e"/>
+                <rect x="10" y="10" width="12" height="12" fill="white" rx="1"/>
+                <rect x="42" y="10" width="12" height="12" fill="white" rx="1"/>
+                <rect x="10" y="42" width="12" height="12" fill="white" rx="1"/>
+                <rect x="14" y="14" width="4"  height="4"  fill="#1a1a2e"/>
+                <rect x="46" y="14" width="4"  height="4"  fill="#1a1a2e"/>
+                <rect x="14" y="46" width="4"  height="4"  fill="#1a1a2e"/>
+                <rect x="38" y="30" width="6"  height="6"  fill="#1a1a2e"/>
+                <rect x="30" y="38" width="6"  height="6"  fill="#1a1a2e"/>
+                <rect x="30" y="30" width="6"  height="6"  fill="#1a1a2e"/>
+                <rect x="46" y="38" width="6"  height="6"  fill="#1a1a2e"/>
+                <rect x="38" y="46" width="6"  height="6"  fill="#1a1a2e"/>
+              </svg>
+            </div>
+            <span class="barcode-alt" id="barcodeAltPreview">Scan to open</span>
+          </div>
+
+        </div><!-- /pass-card -->
+
+        <p class="preview-note">Approximate preview — exact layout varies by iOS version</p>
+      </div>
+    </aside>
+
+  </main>
+
+  <script src="lib/jsQR.min.js"></script>
+  <script src="lib/forge.min.js"></script>
+  <script src="lib/jszip.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
