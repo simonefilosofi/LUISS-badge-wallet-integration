@@ -533,3 +533,110 @@ async function buildManifest(files) {
   }
   return { manifest, manifestJson: JSON.stringify(manifest) };
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   SIGNATURE GENERATION
+   ══════════════════════════════════════════════════════════ */
+
+/**
+ * Minimal valid PKCS#7 DER — ContentInfo wrapping a SignedData with
+ * no signers or digest algorithms. Structurally correct per RFC 5652
+ * so it parses cleanly, but carries no real signature.
+ * Accepted by Xcode Simulator; rejected by real iOS devices.
+ *
+ * ContentInfo SEQUENCE (35 B)
+ *   OID 1.2.840.113549.1.7.2  (signedData)
+ *   [0] EXPLICIT
+ *     SignedData SEQUENCE (20 B)
+ *       version INTEGER 1
+ *       digestAlgorithms SET {}
+ *       encapContentInfo SEQUENCE
+ *         OID 1.2.840.113549.1.7.1  (data)
+ *       signerInfos SET {}
+ */
+const STUB_SIGNATURE = new Uint8Array([
+  0x30, 0x23,                                                 // ContentInfo SEQUENCE
+  0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01,     // OID signedData
+  0x07, 0x02,
+  0xa0, 0x16,                                                 // [0] EXPLICIT
+  0x30, 0x14,                                                 // SignedData SEQUENCE
+  0x02, 0x01, 0x01,                                           // version = 1
+  0x31, 0x00,                                                 // digestAlgorithms SET {}
+  0x30, 0x0b,                                                 // encapContentInfo SEQUENCE
+  0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01,     // OID data
+  0x07, 0x01,
+  0x31, 0x00,                                                 // signerInfos SET {}
+]);
+
+/** Convert an ArrayBuffer to a forge-compatible binary string */
+function bufferToBinaryString(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return s;
+}
+
+/**
+ * Sign manifestJson with the uploaded .p12 certificate using forge.js.
+ * Returns a Uint8Array of the DER-encoded detached CMS signature.
+ * Throws a user-friendly Error if the cert or password is invalid.
+ */
+async function signWithP12(manifestJson) {
+  const file     = p12File.files[0];
+  const password = document.getElementById('p12Password').value;
+
+  // Parse .p12
+  let p12;
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const asn1 = forge.asn1.fromDer(
+      forge.util.createBuffer(bufferToBinaryString(arrayBuffer), 'binary')
+    );
+    p12 = forge.pkcs12.pkcs12FromAsn1(asn1, password);
+  } catch {
+    throw new Error('Could not parse .p12 — check the file and password.');
+  }
+
+  // Extract certificate
+  const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
+  const cert = certBags[forge.pki.oids.certBag]?.[0]?.cert;
+  if (!cert) throw new Error('No certificate found in .p12 file.');
+
+  // Extract private key — try shrouded bag first, then plain key bag
+  const shrouded = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
+  let key = shrouded[forge.pki.oids.pkcs8ShroudedKeyBag]?.[0]?.key;
+  if (!key) {
+    const plain = p12.getBags({ bagType: forge.pki.oids.keyBag });
+    key = plain[forge.pki.oids.keyBag]?.[0]?.key;
+  }
+  if (!key) throw new Error('No private key found in .p12 file.');
+
+  // Build detached CMS SignedData
+  const p7 = forge.pkcs7.createSignedData();
+  p7.content = forge.util.createBuffer(manifestJson, 'utf8');
+  p7.addCertificate(cert);
+  p7.addSigner({
+    key,
+    certificate: cert,
+    digestAlgorithm: forge.pki.oids.sha1,
+    authenticatedAttributes: [
+      { type: forge.pki.oids.contentType,  value: forge.pki.oids.data },
+      { type: forge.pki.oids.messageDigest },
+      { type: forge.pki.oids.signingTime,  value: new Date() },
+    ],
+  });
+  p7.sign({ detached: true });
+
+  const derStr = forge.asn1.toDer(p7.toAsn1()).getBytes();
+  return Uint8Array.from(derStr, c => c.charCodeAt(0));
+}
+
+/**
+ * Return signature bytes for the pass bundle.
+ * Real signing if a .p12 is loaded; simulator-only stub otherwise.
+ */
+async function generateSignature(manifestJson) {
+  if (p12File.files[0]) return signWithP12(manifestJson);
+  return STUB_SIGNATURE;
+}
