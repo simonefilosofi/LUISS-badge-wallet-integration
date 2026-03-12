@@ -444,3 +444,63 @@ async function generateIconBlobs() {
   ]);
   return { icon, icon2x };
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   PASS.JSON GENERATION
+   ══════════════════════════════════════════════════════════ */
+
+/** Convert a 6-digit hex color string to "rgb(r,g,b)" */
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `rgb(${(n >> 16) & 0xff},${(n >> 8) & 0xff},${n & 0xff})`;
+}
+
+/**
+ * Build and return the pass.json object from current state.
+ * passType is always "generic" — covers the widest set of use-cases
+ * without requiring a specific pass category.
+ */
+function buildPassJson() {
+  const org   = orgNameInput.value.trim()   || 'My Organization';
+  const title = passTitleInput.value.trim() || 'My Pass';
+
+  const secondaryFields = [];
+
+  const label1 = field1LabelInput.value.trim();
+  const value1 = field1ValueInput.value.trim();
+  if (label1 || value1) {
+    secondaryFields.push({ key: 'field1', label: label1, value: value1 });
+  }
+
+  const label2 = field2LabelInput.value.trim();
+  const value2 = field2ValueInput.value.trim();
+  if (label2 || value2) {
+    secondaryFields.push({ key: 'field2', label: label2, value: value2 });
+  }
+
+  return {
+    formatVersion:      1,
+    passTypeIdentifier: 'pass.com.walletpass.generator',
+    teamIdentifier:     'TEAMID0000',
+    serialNumber:       crypto.randomUUID(),
+    organizationName:   org,
+    description:        title,
+    backgroundColor:    hexToRgb(bgColorInput.value),
+    foregroundColor:    hexToRgb(fgColorInput.value),
+    labelColor:         hexToRgb(labelColorInput.value),
+    generic: {
+      primaryFields: [
+        { key: 'title', label: '', value: title },
+      ],
+      secondaryFields,
+    },
+    barcodes: [
+      {
+        message:         state.barcodeData,
+        format:          'PKBarcodeFormatQR',
+        messageEncoding: 'iso-8859-1',
+      },
+    ],
+  };
+}
