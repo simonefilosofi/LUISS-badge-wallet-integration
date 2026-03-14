@@ -938,7 +938,7 @@ async function getSignedPassThumbnailUrl() {
     const resp    = await fetch(LUISS_LOGO_W2_ASSET_PATH);
     const blob    = await resp.blob();
     const dataUrl = await blobToDataUrl(blob);
-    const size    = 140;
+    const size    = 80;
     const radius  = size / 2; // fully circular — change to e.g. 28 for rounded square
     return new Promise((resolve, reject) => {
       const img = new Image();
