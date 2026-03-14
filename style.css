@@ -58,8 +58,8 @@ body {
 
 /* ── Theme toggle button ── */
 .theme-toggle {
-  position: absolute;
-  right: 24px;
+  grid-column: 3;
+  justify-self: end;
   background: none;
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -93,12 +93,14 @@ header {
   max-width: 1100px;
   margin: 0 auto;
   padding: 14px 24px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
   gap: 16px;
-  flex-wrap: wrap;
-  position: relative;
+}
+
+.header-brand {
+  grid-column: 2;
 }
 
 .header-brand {
