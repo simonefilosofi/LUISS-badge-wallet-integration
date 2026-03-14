@@ -541,6 +541,8 @@ input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; }
   display: flex;
   flex-direction: column;
   gap: 2px;
+  align-items: center;
+  text-align: center;
 }
 
 .usage-tracker-top {

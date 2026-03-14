@@ -1057,13 +1057,13 @@ function setUsageTracker(countText, metaText) {
 }
 
 function usageSentence(count) {
-  const noun = count === 1 ? 'studente' : 'studenti';
-  return `${count} ${noun} hanno gia scaricato il loro badge questo mese`;
+  const noun = count === 1 ? 'student has' : 'students have';
+  return `${count} ${noun} already downloaded their badge this month`;
 }
 
 async function refreshUsageTracker() {
   if (!WORKER_URL) {
-    setUsageTracker('-- studenti hanno gia scaricato il loro badge questo mese', 'Aggiornato ora');
+    setUsageTracker('-- students have already downloaded their badge this month', 'Updated just now');
     return;
   }
 
@@ -1088,9 +1088,9 @@ async function refreshUsageTracker() {
       count = match ? Number.parseInt(match[1], 10) : 0;
     }
 
-    setUsageTracker(usageSentence(count), 'Aggiornato ora');
+    setUsageTracker(usageSentence(count), 'Updated just now');
   } catch (err) {
-    setUsageTracker('-- studenti hanno gia scaricato il loro badge questo mese', 'Aggiornato ora');
+    setUsageTracker('-- students have already downloaded their badge this month', 'Updated just now');
   }
 }
 
