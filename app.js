@@ -26,6 +26,11 @@ const barcodeDataInput = document.getElementById('barcodeData');
 const downloadBtn    = document.getElementById('downloadBtn');
 const downloadNote   = document.getElementById('downloadNote');
 
+const NOTE_UPLOAD_QR = 'Upload a QR code image to enable download.';
+const NOTE_FILL_FIELDS = 'Enter your full name and matricola to enable download.';
+const NOTE_INVALID_ID = 'Matricola must be exactly 6 digits.';
+const NOTE_INVALID_NAME = 'Full name must contain letters only.';
+
 /* ── Hidden canvas for QR decoding ── */
 const canvas = document.createElement('canvas');
 canvas.hidden = true;
@@ -36,6 +41,52 @@ const ctx = canvas.getContext('2d');
 function show(el) { el.classList.remove('hidden'); }
 function hide(el) { el.classList.add('hidden'); }
 
+function hasValidFullName() {
+  return /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/.test(field1ValueInput.value.trim());
+}
+
+function hasValidIdNumber() {
+  return /^[0-9]{6}$/.test(field2ValueInput.value.trim());
+}
+
+function hasRequiredIdentityFields() {
+  return !!(field1ValueInput.value.trim() && hasValidFullName() && hasValidIdNumber());
+}
+
+function canGeneratePass() {
+  return !!(state.barcodeData.trim() && hasRequiredIdentityFields());
+}
+
+function updateDownloadBtnState() {
+  downloadBtn.disabled = !canGeneratePass();
+
+  if (!state.barcodeData.trim()) {
+    downloadNote.textContent = NOTE_UPLOAD_QR;
+    return;
+  }
+
+  if (!hasRequiredIdentityFields()) {
+    if (field1ValueInput.value.trim() && !hasValidFullName()) {
+      downloadNote.textContent = NOTE_INVALID_NAME;
+      return;
+    }
+
+    downloadNote.textContent = field2ValueInput.value.trim() && !hasValidIdNumber()
+      ? NOTE_INVALID_ID
+      : NOTE_FILL_FIELDS;
+    return;
+  }
+
+  if (
+    downloadNote.textContent === NOTE_UPLOAD_QR
+    || downloadNote.textContent === NOTE_FILL_FIELDS
+    || downloadNote.textContent === NOTE_INVALID_ID
+    || downloadNote.textContent === NOTE_INVALID_NAME
+  ) {
+    downloadNote.textContent = '';
+  }
+}
+
 function setDecodeSuccess(data) {
   state.barcodeData = data;
   barcodeDataInput.value = data;
@@ -43,8 +94,7 @@ function setDecodeSuccess(data) {
   decodeStatus.classList.remove('error');
   show(decodeResult);
   hide(decodeError);
-  downloadBtn.disabled = false;
-  downloadNote.textContent = '';
+  updateDownloadBtnState();
   renderPreview();
   updateSignedBtnState();
 }
@@ -54,8 +104,7 @@ function setDecodeError() {
   barcodeDataInput.value = '';
   hide(decodeResult);
   show(decodeError);
-  downloadBtn.disabled = true;
-  downloadNote.textContent = 'Upload a QR code image to enable download.';
+  updateDownloadBtnState();
   renderPreview();
   updateSignedBtnState();
 }
@@ -128,8 +177,7 @@ function clearUpload() {
   hide(decodeResult);
   hide(decodeError);
   state.qrDataUrl  = '';
-  downloadBtn.disabled = true;
-  downloadNote.textContent = 'Upload a QR code image to enable download.';
+  updateDownloadBtnState();
 }
 
 /* ── Drop zone events ── */
@@ -172,7 +220,8 @@ dropClear.addEventListener('click', (e) => {
 /* ── Keep state.barcodeData in sync if user edits the input ── */
 barcodeDataInput.addEventListener('input', () => {
   state.barcodeData = barcodeDataInput.value;
-  downloadBtn.disabled = !state.barcodeData.trim();
+  updateDownloadBtnState();
+  updateSignedBtnState();
   renderPreview();
 });
 
@@ -331,6 +380,24 @@ function renderPreview() {
  field1LabelInput, field1ValueInput,
  field2LabelInput, field2ValueInput].forEach(el => el.addEventListener('input', renderPreview));
 
+[field1ValueInput, field2ValueInput].forEach(el => el.addEventListener('input', () => {
+  if (el === field1ValueInput) {
+    // Keep full name as letters and spaces only.
+    field1ValueInput.value = field1ValueInput.value
+      .replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trimStart();
+  }
+
+  if (el === field2ValueInput) {
+    // Keep ID as digits only and cap at 6 chars.
+    field2ValueInput.value = field2ValueInput.value.replace(/\D/g, '').slice(0, 6);
+  }
+
+  updateDownloadBtnState();
+  updateSignedBtnState();
+}));
+
 /* ── Logo upload ── */
 logoFileInput.addEventListener('change', () => {
   const file = logoFileInput.files[0];
@@ -357,6 +424,7 @@ p12File.addEventListener('change', () => {
 
 /* ── Initial render ── */
 renderPreview();
+updateDownloadBtnState();
 loadDefaultLogo();
 
 
@@ -657,6 +725,12 @@ const btnIdle    = downloadBtn.querySelector('.btn-idle');
 const btnLoading = downloadBtn.querySelector('.btn-loading');
 
 async function buildAndDownload() {
+  if (!canGeneratePass()) {
+    updateDownloadBtnState();
+    updateSignedBtnState();
+    return;
+  }
+
   downloadBtn.disabled = true;
   btnIdle.classList.add('hidden');
   btnLoading.classList.remove('hidden');
@@ -721,7 +795,8 @@ async function buildAndDownload() {
   } finally {
     btnIdle.classList.remove('hidden');
     btnLoading.classList.add('hidden');
-    downloadBtn.disabled = !state.barcodeData.trim();
+    updateDownloadBtnState();
+    updateSignedBtnState();
   }
 }
 
@@ -738,11 +813,11 @@ const LUISS_LOGO_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAA
 
 
 const DEFAULTS = {
-  orgName:     'LUISS University',
-  passTitle:   'LUISS University',
-  field1Label: 'Role',
-  field1Value: 'Student',
-  field2Label: '',
+  orgName:     'Luiss Guido Carli',
+  passTitle:   'Luiss Guido Carli',
+  field1Label: 'Studente',
+  field1Value: '',
+  field2Label: 'Matricola',
   field2Value: '',
   bg:          '#15396c',
   fg:          '#ffffff',
@@ -780,7 +855,8 @@ function startOver() {
   p12FileNameEl.textContent      = 'No file chosen';
   p12PasswordGroup.style.display = 'none';
 
-  downloadNote.textContent = 'Upload a QR code image to enable download.';
+  updateDownloadBtnState();
+  updateSignedBtnState();
   renderPreview();
 }
 
@@ -977,12 +1053,14 @@ function initSigningStatus() {
     signingStatus.classList.add('offline');
     signingStatusText.textContent = 'Signing service not configured';
   }
+
+  updateSignedBtnState();
 }
 initSigningStatus();
 
 /* Enable signed button when worker is configured AND barcode data exists */
 function updateSignedBtnState() {
-  signedBtn.disabled = !WORKER_URL || !state.barcodeData.trim();
+  signedBtn.disabled = !WORKER_URL || !canGeneratePass();
 }
 
 /**
@@ -990,7 +1068,11 @@ function updateSignedBtnState() {
  * API key server-side and forwards to WalletWallet.
  */
 async function buildAndDownloadSigned() {
-  if (!WORKER_URL) return;
+  if (!WORKER_URL || !canGeneratePass()) {
+    updateDownloadBtnState();
+    updateSignedBtnState();
+    return;
+  }
 
   signedBtn.disabled = true;
   signedBtnIdle.classList.add('hidden');
@@ -998,16 +1080,22 @@ async function buildAndDownloadSigned() {
   downloadNote.textContent = '';
 
   try {
-    const sFirstName = firstNameInput.value.trim();
-    const sLastName  = lastNameInput.value.trim();
-    const sFullName  = [sFirstName, sLastName].filter(Boolean).join(' ');
+    const combinedLabel = [
+      field1LabelInput.value.trim() || 'Student',
+      field2LabelInput.value.trim() || 'Matricola',
+    ].join(' - ');
+
+    const combinedValue = [
+      field1ValueInput.value.trim(),
+      field2ValueInput.value.trim(),
+    ].filter(Boolean).join(' - ');
 
     const body = {
       barcodeValue:  state.barcodeData,
       barcodeFormat: 'QR',
       title:         passTitleInput.value.trim()   || 'My Pass',
-      label:         field1LabelInput.value.trim() || '',
-      value:         field1ValueInput.value.trim() || '',
+      label:         combinedLabel,
+      value:         combinedValue,
       color:         bgColorInput.value,
     };
 
@@ -1037,6 +1125,7 @@ async function buildAndDownloadSigned() {
   } finally {
     signedBtnIdle.classList.remove('hidden');
     signedBtnLoading.classList.add('hidden');
+    updateDownloadBtnState();
     updateSignedBtnState();
   }
 }

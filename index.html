@@ -128,20 +128,21 @@
 
         <input type="hidden" id="firstName">
         <input type="hidden" id="lastName">
-
-        <input type="hidden" id="orgName" value="LUISS University">
-
-        <input type="text" id="passTitle" value="LUISS University" readonly style="display:none">
-        <input type="text" id="field1Label" value="Student" readonly style="display:none">
+        <input type="hidden" id="orgName" value="Luiss Guido Carli">
+        <input type="hidden" id="passTitle" value="Luiss Guido Carli">
+        <input type="hidden" id="field1Label" value="Studente">
+        <input type="hidden" id="field2Label" value="Matricola">
 
         <div class="form-group name-field-group">
           <label for="field1Value">Your full name <span class="required-star">*</span></label>
-          <input class="name-input" type="text" id="field1Value" placeholder="e.g. Mario Rossi" value="" autocomplete="name">
-          <span class="name-hint">This is the only field you need to fill in</span>
+          <input class="name-input" type="text" id="field1Value" placeholder="e.g. Mario Rossi" value="" pattern="[A-Za-zÀ-ÖØ-öø-ÿ ]+" autocomplete="name">
+          <span class="name-hint">Fill in your name and matricola below</span>
         </div>
 
-        <input type="hidden" id="field2Label">
-        <input type="hidden" id="field2Value">
+        <div class="form-group">
+          <label for="field2Value">Matricola <span class="required-star">*</span></label>
+          <input class="name-input" type="text" id="field2Value" value="" placeholder="e.g. 123456" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="off">
+        </div>
       </section>
 
       <!-- Logo file input hidden — logo loaded from default -->
