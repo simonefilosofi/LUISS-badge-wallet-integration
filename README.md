@@ -2,23 +2,40 @@
 
 Because opening an app in the rain at 8am should be a crime.
 
-## The problem
+## What is this?
 
-Every now and then the luiss app likes to make mischief, asking you to change passwords.
-This would be fine if you never had to use it while running late, standing in the rain or with frozen fingers in January. Unfortunately, that's exactly when you need it.
+This little tool turns your LUISS badge into an **Apple Wallet pass** — the same place you keep your boarding passes and loyalty cards.
+Once it's in Wallet, you can scan in at the entrance with a **double-click of the side button**, straight from the lock screen. No app, no login, no password reset at 7:58am.
 
-This tool puts your badge QR code in Apple Wallet — same place as your boarding passes and coffee loyalty cards — so you can scan in with a double-click of the side button. 
-No app. No login. No password reset at 7:58am.
+## How do I use it?
 
-## What it does
+Three steps, I promise:
 
-1. **Upload your badge QR code** — screenshot it from the LUISS app while you still remember your password.
-2. **Enter your name and role** — yes, you have to type it yourself.
-   No, I can't hack the LUISS database (I don't want to get in trouble).
-3. **Download your `.pkpass`** — add it to Apple Wallet and scan in faster than the person in front of you can find their student badge.
+1. **Take a screenshot** of your QR code from the LUISS app (do it now, while you remember your password).
+2. **Go to the website**, upload the screenshot, type your name and matricola (ID number).
+3. **Download the pass** and add it to Apple Wallet. Done.
 
-Once it's in Wallet, you scan in straight from the lock screen.
-The badge reader doesn't know the difference. We won't tell.
+That's it. Next time you walk into LUISS, just double-click the side button and hold your phone to the reader. You're in.
+
+## Is my data safe? 🔒
+
+Yes — and here's why you can trust that:
+
+- **Your QR code never leaves your device.** It's read and processed entirely in your browser. Nothing is uploaded, stored or sent anywhere.
+- **Your name and matricola** are only used to personalise the pass locally. We don't store them, log them, or care about them.
+- The only thing that briefly touches a server is a small, anonymised signature request needed to make Apple accept the pass (iOS requires a cryptographic signature — boring legal stuff). No personal data is included in that request.
+- There's no account, no tracking, no cookies, no funny business.
+
+Your badge is yours. It stays yours.
+
+---
+
+> **From now on the information written in the readme are for developers.**
+> *If you don't code I would spare you this suffering.*
+> *But if you really want to move forward...you're welcome.*
+
+
+---
 
 ## How signing works
 
@@ -70,5 +87,4 @@ Then update `WORKER_URL` in `app.js` with your worker's URL.
 ## Contributing
 
 Found a bug? Open an issue. Have a fix? Open a PR.
-Are you a LUISS IT admin reading this? Hi. Please just add official
-Wallet support. I're begging you.
+Are you a LUISS IT admin reading this? Hi. Please just add official Wallet support, I can help. I'm begging you.
